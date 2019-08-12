@@ -17,45 +17,44 @@ class RequestCell: UICollectionViewCell {
     @IBOutlet weak var durationLabel: WHLabel!
     
     func populate(request: RequestModel?){
-        guard request != nil else {
-            return
+        guard let request = request else { return }
+
+        let color: UIColor
+
+        switch request.code {
+        case 200..<300:
+            color = Colors.HTTPCode.Success
+        case 300..<400:
+            color = Colors.HTTPCode.Redirect
+        case 400..<500:
+            color = Colors.HTTPCode.ClientError
+        case 500..<600:
+            color = Colors.HTTPCode.ServerError
+        default:
+            color = Colors.HTTPCode.Generic
         }
-        
-        let code = request?.code ?? 0
-        codeLabel.text = code != 0 ? String(request!.code) : "..."
-        if let code = request?.code {
-            var color: UIColor = Colors.HTTPCode.Generic
-            switch code {
-            case 200..<300:
-                color = Colors.HTTPCode.Success
-            case 300..<400:
-                color = Colors.HTTPCode.Redirect
-            case 400..<500:
-                color = Colors.HTTPCode.ClientError
-            case 500..<600:
-                color = Colors.HTTPCode.ServerError
-            default:
-                color = Colors.HTTPCode.Generic
-            }
-            codeLabel.borderColor = color
-            codeLabel.textColor = color
-        } else {
-            codeLabel.borderColor = Colors.HTTPCode.Generic
-            codeLabel.textColor = Colors.HTTPCode.Generic
-        }
-        durationLabel.text = request?.duration?.formattedMilliseconds() ?? ""
+
+        codeLabel.text = request.code != 0 ? String(request.code) : "..."
+        codeLabel.borderColor = color
+        codeLabel.textColor = color
+        durationLabel.text = request.duration?.formattedMilliseconds() ?? ""
 
 
-        let components = request.flatMap { URLComponents(string: $0.url) }
-
+        let components = URLComponents(string: request.url)
         let schemeAndHost = NSMutableAttributedString()
-        if let method = request?.method.uppercased() {
-            schemeAndHost.append(NSAttributedString(string: method + " ", attributes: [.foregroundColor: UIColor.black]))
-        }
+
+        schemeAndHost.append(
+            NSAttributedString(
+                string: request.method.uppercased() + " ",
+                attributes: [.foregroundColor: UIColor.black]
+            )
+        )
+
         if let host = components?.host {
             let scheme = components?.scheme.map { "\($0)://" } ?? ""
             schemeAndHost.append(NSAttributedString(string: scheme + host, attributes: [.foregroundColor: UIColor.lightGray]))
         }
+
         hostLabel.attributedText = schemeAndHost
         pathLabel.text = components?.path ?? ""
         queryLabel.text = components?.query.map { "?" + $0 } ?? ""

@@ -161,11 +161,7 @@ class RequestsViewController: WHBaseViewController {
 
 extension RequestsViewController: UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if let searchResults = searchResults {
-            return searchResults.count
-        }
-
-        return items.count
+        return searchResults?.count ?? items.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

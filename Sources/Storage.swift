@@ -109,9 +109,8 @@ open class Storage {
 
     private func transaction<R>(_ action: () -> R) -> R {
         os_unfair_lock_lock(lock)
-        let r = action()
-        os_unfair_lock_unlock(lock)
-        return r
+        defer { os_unfair_lock_unlock(lock) }
+        return action()
     }
 
     private func notify(_ change: Change) {
