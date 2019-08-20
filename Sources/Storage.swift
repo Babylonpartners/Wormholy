@@ -44,23 +44,15 @@ open class Storage {
     
     open private(set) var requests: [RequestModel] = []
     private var observers: [Token: (Change) -> Void] = [:]
-    private let lock: os_unfair_lock_t
+    private let lock = NSLock()
 
     init() {
-        lock = os_unfair_lock_t.allocate(capacity: 1)
-        lock.initialize(to: os_unfair_lock_s())
-
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(observeMemoryWarning),
             name: UIApplication.didReceiveMemoryWarningNotification,
             object: nil
         )
-    }
-
-    deinit {
-        lock.deinitialize(count: 1)
-        lock.deallocate()
     }
 
     func observe(_ action: @escaping (Change) -> Void) -> Token {
@@ -108,14 +100,12 @@ open class Storage {
     }
 
     private func transaction<R>(_ action: () -> R) -> R {
-        os_unfair_lock_lock(lock)
-        defer { os_unfair_lock_unlock(lock) }
+        lock.lock()
+        defer { lock.unlock() }
         return action()
     }
 
     private func notify(_ change: Change) {
-        os_unfair_lock_assert_owner(lock)
-
         for observer in observers.values {
             observer(change)
         }
