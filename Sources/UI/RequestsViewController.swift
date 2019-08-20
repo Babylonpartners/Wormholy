@@ -9,46 +9,70 @@
 import UIKit
 
 class RequestsViewController: WHBaseViewController {
-    
+
     @IBOutlet weak var collectionView: WHCollectionView!
-    var filteredRequests: [RequestModel] = []
-    var searchController: UISearchController?
+    @IBOutlet weak var layout: UICollectionViewFlowLayout!
+
+    private var items: [RequestModel] = []
+    private var searchResults: [RequestModel]?
+
+    private var searchController: UISearchController?
+    private var prototypeCell: RequestCell!
+    private var storageToken: Storage.Token?
+
+    private var isSearching: Bool {
+        return searchResults != nil
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         addSearchController()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "More", style: .plain, target: self, action: #selector(openActionSheet))
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
-        
-        collectionView?.register(UINib(nibName: "RequestCell", bundle:WHBundle.getBundle()), forCellWithReuseIdentifier: "RequestCell")
-        
-        filteredRequests = Storage.shared.requests
-        NotificationCenter.default.addObserver(forName: newRequestNotification, object: nil, queue: nil) { [weak self] (notification) in
-            DispatchQueue.main.sync { [weak self] in
-                self?.filteredRequests = self?.filterRequests(text: self?.searchController?.searchBar.text) ?? []
-                self?.collectionView.reloadData()
+
+        let nib = UINib(nibName: "RequestCell", bundle:WHBundle.getBundle())
+        prototypeCell = (nib.instantiate(withOwner: nil, options: nil)[0] as! RequestCell)
+        collectionView?.register(nib, forCellWithReuseIdentifier: "RequestCell")
+        collectionView.reloadData()
+
+        storageToken = Storage.shared.observe { [weak self] change in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+
+                switch change {
+                case let .appended(items):
+                    self.items.append(contentsOf: items)
+
+                    if !self.isSearching {
+                        self.collectionView.insertItems(
+                            at: (0 ..< items.count).map { IndexPath(item: $0, section: 0) }
+                        )
+                    }
+                case let .removed(range):
+                    self.items.removeSubrange(range)
+
+                    if !self.isSearching {
+                        self.collectionView.deleteItems(
+                            at: range.map { IndexPath(item: self.presentationIndex(fromModelIndex: $0), section: 0) }
+                        )
+                    }
+                case let .updated(item, at: index):
+                    self.items[index] = item
+
+                    if !self.isSearching {
+                        self.collectionView.reloadItems(at: [
+                            IndexPath(item: self.presentationIndex(fromModelIndex: index), section: 0)
+                        ])
+                    }
+                case .cleared:
+                    self.searchResults = nil
+                    self.items = []
+                    self.collectionView.reloadData()
+                }
             }
         }
-        
-    }
-    
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        
-        coordinator.animate(alongsideTransition: { (context) in
-            //Place code here to perform animations during the rotation.
-            
-        }) { (completionContext) in
-            //Code here will execute after the rotation has finished.
-            (self.collectionView?.collectionViewLayout as? UICollectionViewFlowLayout)?.itemSize = CGSize(width: UIScreen.main.bounds.width, height: 76)
-            self.collectionView.reloadData()
-        }
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
     }
     
     //  MARK: - Search
@@ -68,17 +92,7 @@ class RequestsViewController: WHBaseViewController {
         }
         definesPresentationContext = true
     }
-    
-    func filterRequests(text: String?) -> [RequestModel]{
-        guard text != nil && text != "" else {
-            return Storage.shared.requests
-        }
-        
-        return Storage.shared.requests.filter { (request) -> Bool in
-            return request.url.range(of: text!, options: .caseInsensitive) != nil ? true : false
-        }
-    }
-    
+
     // MARK: - Actions
     @objc func openActionSheet(){
         let ac = UIAlertController(title: "Wormholy", message: "Choose an option", preferredStyle: .actionSheet)
@@ -99,13 +113,11 @@ class RequestsViewController: WHBaseViewController {
     
     func clearRequests() {
         Storage.shared.clearRequests()
-        filteredRequests = Storage.shared.requests
-        collectionView.reloadData()
     }
     
     func shareContent(){
         var text = ""
-        for request in filteredRequests{
+        for request in items {
             text = text + RequestModelBeautifier.txtExport(request: request)
         }
         let textShare = [text]
@@ -133,7 +145,15 @@ class RequestsViewController: WHBaseViewController {
             self.show(requestDetailVC, sender: self)
         }
     }
-    
+
+    func modelIndex(fromPresentationIndex index: Int) -> Int {
+        return items.count - index - 1
+    }
+
+    func presentationIndex(fromModelIndex index: Int) -> Int {
+        return items.count - index - 1
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self, name: newRequestNotification, object: nil)
     }
@@ -141,33 +161,60 @@ class RequestsViewController: WHBaseViewController {
 
 extension RequestsViewController: UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredRequests.count
+        return searchResults?.count ?? items.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "RequestCell", for: indexPath) as! RequestCell
-        
-        cell.populate(request: filteredRequests[indexPath.item])
+
+        if let searchResults = searchResults {
+            cell.populate(request: searchResults[indexPath.row])
+        } else {
+            cell.populate(request: items[modelIndex(fromPresentationIndex: indexPath.row)])
+        }
+
         return cell
     }
 }
 
 extension RequestsViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        openRequestDetailVC(request: filteredRequests[indexPath.item])
+        if let searchResults = searchResults {
+            openRequestDetailVC(request: searchResults[indexPath.row])
+        } else {
+            openRequestDetailVC(request: items[modelIndex(fromPresentationIndex: indexPath.row)])
+        }
     }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.bounds.size.width, height: 76)
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if let searchResults = searchResults {
+            prototypeCell.populate(request: searchResults[indexPath.row])
+        } else {
+            prototypeCell.populate(request: items[modelIndex(fromPresentationIndex: indexPath.row)])
+        }
+
+        let width = collectionView.bounds.width
+        let height = prototypeCell.contentView
+            .systemLayoutSizeFitting(CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
+                                     withHorizontalFittingPriority: .required,
+                                     verticalFittingPriority: .fittingSizeLevel)
+            .height
+
+        return CGSize(width: width, height: height)
     }
 }
 
 // MARK: - UISearchResultsUpdating Delegate
 extension RequestsViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        filteredRequests = filterRequests(text: searchController.searchBar.text)
+        if let text = searchController.searchBar.text, !text.isEmpty {
+            searchResults = items.filter { item in
+                return item.url.range(of: text, options: .caseInsensitive) != nil
+            }
+        } else {
+            searchResults = nil
+        }
+
         collectionView.reloadData()
     }
 }

@@ -11,3 +11,6 @@ import Foundation
 //Notifications
 let fireWormholy = NSNotification.Name(rawValue: "wormholy_fire")
 let newRequestNotification = NSNotification.Name(rawValue: "wormholy_new_request")
+let requestChangedNotification = NSNotification.Name(rawValue: "wormholy_request_changed")
+let changedRequestIndexKey = "wormholy_changed_request_index"
+let requestKey = "wormholy_request"
