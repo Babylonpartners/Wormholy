@@ -9,8 +9,23 @@
 import Foundation
 import UIKit
 
-public class Wormholy: NSObject
-{
+public class Wormholy: NSObject {
+    private static var _rewriteRules: [RewriteRule] = []
+    private static var _rewriteRulesLock = NSLock()
+
+    public static var rewriteRules: [RewriteRule] {
+        get {
+            _rewriteRulesLock.lock()
+            defer { _rewriteRulesLock.unlock() }
+            return _rewriteRules
+        }
+        set {
+            _rewriteRulesLock.lock()
+            defer { _rewriteRulesLock.unlock() }
+            _rewriteRules = newValue
+        }
+    }
+
     @objc public static func swiftyLoad() {
         NotificationCenter.default.addObserver(forName: fireWormholy, object: nil, queue: nil) { (notification) in
             Wormholy.presentWormholyFlow()

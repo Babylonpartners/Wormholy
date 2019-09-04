@@ -8,11 +8,28 @@
 
 import UIKit
 import Foundation
+import Wormholy
 
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        // Rewrite all requests with a path starting with `/posts/1`.
+        Wormholy.rewriteRules = [
+            RewriteRule(
+                urlPredicate: NSPredicate(format: "path BEGINSWITH %@", "/posts/1"),
+                transform: { request in
+                    var request = request
+                    var components = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+                    components.host = "localhost"
+                    components.path = "/rewrited" + components.path
+                    request.url = components.url!
+                    return request
+                }
+            )
+        ]
+
         if #available(iOS 10.0, *) {
             let timer = Timer.scheduledTimer(withTimeInterval: 8, repeats: true) { (timer) in
                 DataFetcher.sharedInstance.getPost(id: Utils.random(max: 128), completion: {

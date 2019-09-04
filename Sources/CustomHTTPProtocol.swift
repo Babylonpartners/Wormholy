@@ -38,12 +38,17 @@ public class CustomHTTPProtocol: URLProtocol {
     }
     
     override public func startLoading() {
-        let newRequest = ((request as NSURLRequest).mutableCopy() as? NSMutableURLRequest)!
-        CustomHTTPProtocol.setProperty(true, forKey: Constants.RequestHandledKey, in: newRequest)
-        sessionTask = session?.dataTask(with: newRequest as URLRequest)
+        let matchedRule = Wormholy.rewriteRules.first { $0.urlPredicate.evaluate(with: request.url) }
+        let modifier = matchedRule?.transform ?? { $0 }
+        let modifiedRequest = modifier(self.request)
+
+        let requestObject = (modifiedRequest as NSURLRequest).mutableCopy() as! NSMutableURLRequest
+        CustomHTTPProtocol.setProperty(true, forKey: Constants.RequestHandledKey, in: requestObject)
+
+        sessionTask = session?.dataTask(with: requestObject as URLRequest)
         sessionTask?.resume()
         
-        currentRequest = RequestModel(request: newRequest)
+        currentRequest = RequestModel(request: requestObject)
 
         if let request = currentRequest {
             Storage.shared.saveRequest(request: request)

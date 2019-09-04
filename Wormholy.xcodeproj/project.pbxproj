@@ -56,6 +56,7 @@
 		45FF5C5220877A950084BD50 /* Section.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45FF5C5120877A950084BD50 /* Section.swift */; };
 		45FF5C54208794720084BD50 /* WHDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45FF5C53208794720084BD50 /* WHDate.swift */; };
 		52D6D9871BEFF229002C0205 /* Wormholy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D6D97C1BEFF229002C0205 /* Wormholy.framework */; };
+		6567D322230C3C4100679B9E /* RewriteRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6567D321230C3C4100679B9E /* RewriteRule.swift */; };
 		8933C7851EB5B820000D00A4 /* Wormholy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8933C7841EB5B820000D00A4 /* Wormholy.swift */; };
 		8933C7901EB5B82D000D00A4 /* WormholyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8933C7891EB5B82A000D00A4 /* WormholyTests.swift */; };
 		93A86AB12228349F006E56FB /* SwiftySelfAwareHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A86AB02228349F006E56FB /* SwiftySelfAwareHelper.swift */; };
@@ -124,6 +125,7 @@
 		45FF5C53208794720084BD50 /* WHDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WHDate.swift; sourceTree = "<group>"; };
 		52D6D97C1BEFF229002C0205 /* Wormholy.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Wormholy.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52D6D9861BEFF229002C0205 /* Wormholy-iOS Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Wormholy-iOS Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6567D321230C3C4100679B9E /* RewriteRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewriteRule.swift; sourceTree = "<group>"; };
 		8933C7841EB5B820000D00A4 /* Wormholy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wormholy.swift; sourceTree = "<group>"; };
 		8933C7891EB5B82A000D00A4 /* WormholyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WormholyTests.swift; sourceTree = "<group>"; };
 		93A86AB02228349F006E56FB /* SwiftySelfAwareHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftySelfAwareHelper.swift; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 		8933C7811EB5B7E0000D00A4 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				6567D321230C3C4100679B9E /* RewriteRule.swift */,
 				8933C7841EB5B820000D00A4 /* Wormholy.swift */,
 				455818C1207D61A100D2F954 /* CustomHTTPProtocol.swift */,
 				455818C2207D61A100D2F954 /* Storage.swift */,
@@ -546,6 +549,7 @@
 				453A167720ED1B02001CEB9D /* WHString.swift in Sources */,
 				452CC1322175FDB200CB5E21 /* CustomActivity.swift in Sources */,
 				45868F1420F4E2B10024C77B /* BodyDetailViewController.swift in Sources */,
+				6567D322230C3C4100679B9E /* RewriteRule.swift in Sources */,
 				45FF5C5220877A950084BD50 /* Section.swift in Sources */,
 				451C9E6920810B98002A34BC /* WHCollectionView.swift in Sources */,
 				45C4F4F320860FBC007D0D17 /* WHTextView.swift in Sources */,
