@@ -9,9 +9,9 @@
 import UIKit
 
 class RequestDetailViewController: WHBaseViewController {
-    
+
     @IBOutlet weak var tableView: WHTableView!
-    
+
     var request: RequestModel?
     var sections: [Section] = [
         Section(name: "Overview", type: .overview),
@@ -20,44 +20,60 @@ class RequestDetailViewController: WHBaseViewController {
         Section(name: "Response Header", type: .responseHeader),
         Section(name: "Response Body", type: .responseBody)
     ]
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         if let urlString = request?.url{
             title = URL(string: urlString)?.path
         }
-        
+
         let shareButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareContent))
         navigationItem.rightBarButtonItems = [shareButton]
-        
+
         tableView.estimatedRowHeight = 100.0
         tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UINib(nibName: "TextTableViewCell", bundle:WHBundle.getBundle()), forCellReuseIdentifier: "TextTableViewCell")
         tableView.register(UINib(nibName: "ActionableTableViewCell", bundle:WHBundle.getBundle()), forCellReuseIdentifier: "ActionableTableViewCell")
         tableView.register(UINib(nibName: "RequestTitleSectionView", bundle:WHBundle.getBundle()), forHeaderFooterViewReuseIdentifier: "RequestTitleSectionView")
     }
-    
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-    
+
     @objc func shareContent(){
         if let request = request{
-            let textShare = [RequestModelBeautifier.txtExport(request: request)]
-            let customItem = CustomActivity(title: "Save to the desktop", image: UIImage(named: "activity_icon", in: WHBundle.getBundle(), compatibleWith: nil)) { (sharedItems) in
-                guard let sharedStrings = sharedItems as? [String] else { return }
-                
-                for string in sharedStrings {
-                    FileHandler.writeTxtFileOnDesktop(text: string, fileName: "\(Int(Date().timeIntervalSince1970))-wormholy.txt")
-                }
+
+            let alert = UIAlertController(title: "Export", message: "", preferredStyle: .actionSheet)
+            let action = UIAlertAction(title: "cURL", style: .default) { [weak self] item in
+                self?.export(share: RequestModelBeautifier.curlExport(request: request))
             }
-            let activityViewController = UIActivityViewController(activityItems: textShare, applicationActivities: [customItem])
-            activityViewController.popoverPresentationController?.sourceView = self.view
-            self.present(activityViewController, animated: true, completion: nil)
+
+            let action2 = UIAlertAction(title: "Text dump", style: .default) { [weak self] item in
+                self?.export(share: RequestModelBeautifier.txtExport(request: request))
+            }
+
+            alert.addAction(action)
+            alert.addAction(action2)
+            self.present(alert, animated: true, completion: nil)
         }
     }
-    
+
+    func export(share payload: String) {
+        let customItem = CustomActivity(title: "Save to desktop", image: UIImage(named: "activity_icon", in: WHBundle.getBundle(), compatibleWith: nil)) { (sharedItems) in
+            guard let sharedStrings = sharedItems as? [String] else { return }
+
+            for string in sharedStrings {
+                FileHandler.writeTxtFileOnDesktop(text: string, fileName: "\(Int(Date().timeIntervalSince1970))-wormholy.txt")
+            }
+        }
+
+        let activityViewController = UIActivityViewController(activityItems: [payload], applicationActivities: [customItem])
+        activityViewController.popoverPresentationController?.sourceView = self.view
+        self.present(activityViewController, animated: true, completion: nil)
+    }
+
     // MARK: - Navigation
     func openBodyDetailVC(title: String?, body: Data?){
         let storyboard = UIStoryboard(name: "Flow", bundle: WHBundle.getBundle())
@@ -67,7 +83,7 @@ class RequestDetailViewController: WHBaseViewController {
             self.show(requestDetailVC, sender: self)
         }
     }
-    
+
 }
 
 
@@ -75,24 +91,24 @@ extension RequestDetailViewController: UITableViewDataSource{
     func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
-    
+
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: "RequestTitleSectionView") as! RequestTitleSectionView
         header.contentView.backgroundColor = Colors.Gray.lighestGray
         header.titleLabel.text = sections[section].name
         return header
     }
-    
+
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 40
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+
         let section = sections[indexPath.section]
         if let req = request{
             switch section.type {
@@ -118,16 +134,16 @@ extension RequestDetailViewController: UITableViewDataSource{
                 return cell
             }
         }
-        
+
         return UITableViewCell()
     }
-    
+
 }
 
 extension RequestDetailViewController: UITableViewDelegate{
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let section = sections[indexPath.section]
-        
+
         switch section.type {
         case .requestBody:
             openBodyDetailVC(title: "Request body", body: request?.httpBody)
