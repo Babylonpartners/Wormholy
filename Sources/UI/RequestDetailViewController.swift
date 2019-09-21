@@ -38,10 +38,6 @@ class RequestDetailViewController: WHBaseViewController {
         tableView.register(UINib(nibName: "RequestTitleSectionView", bundle:WHBundle.getBundle()), forHeaderFooterViewReuseIdentifier: "RequestTitleSectionView")
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-
     @objc func shareContent(){
         if let request = request{
 
@@ -83,7 +79,6 @@ class RequestDetailViewController: WHBaseViewController {
             self.show(requestDetailVC, sender: self)
         }
     }
-
 }
 
 
@@ -137,7 +132,6 @@ extension RequestDetailViewController: UITableViewDataSource{
 
         return UITableViewCell()
     }
-
 }
 
 extension RequestDetailViewController: UITableViewDelegate{

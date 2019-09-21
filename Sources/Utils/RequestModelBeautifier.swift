@@ -72,19 +72,30 @@ class RequestModelBeautifier: NSObject {
     }
 
     static func curlExport(request: RequestModel) -> String {
-        func serialize(dictionary: [String: String]) -> String {
-            let serialized = dictionary.reduce("") { (result, next) in
-                return result + "-H '\(next.key): \(next.value)' "
+        func serializeHeader(dictionary: [String: String]) -> String {
+            var result = ""
+
+            dictionary.keys.sorted().forEach { key in
+                guard let value = dictionary[key] else { return }
+                result += " -H '\(key.lowercased()): \(value)'"
             }
 
-            return serialized
+            return result
         }
 
-        let commandName = "cURL"
-        let method = "-X\(request.method)"
-        let headers = request.headers.map(serialize) ?? ""
+        let curl = "curl"
+        let headers = request.headers.map(serializeHeader) ?? ""
 
-        return "\(commandName) \(method) \(headers) --compressed '\(request.url)'"
+        let serializedBody = request.httpBody.map { body -> String in
+            return " --data-binary '\(String(decoding: body, as: UTF8.self))'"
+        }
+
+        var body = "\(serializedBody ?? "")"
+        if request.method.lowercased() != "post" {
+            body +=  " -X \(request.method.uppercased())"
+        }
+        
+        return "\(curl)\(headers)\(body) --compressed '\(request.url)'"
     }
 }
 

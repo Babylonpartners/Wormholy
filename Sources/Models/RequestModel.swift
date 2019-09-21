@@ -36,5 +36,4 @@ open class RequestModel: Codable {
         code = responseHttp.statusCode
         responseHeaders = responseHttp.allHeaderFields as? [String: String]
     }
-    
 }
