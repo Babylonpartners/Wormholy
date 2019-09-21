@@ -54,6 +54,7 @@ class RequestModelBeautifier: NSObject {
     }
     
     static func txtExport(request: RequestModel) -> String{
+        
         var txt: String = ""
         txt.append("*** Overview *** \n")
         txt.append(overview(request: request).string + "\n\n")
@@ -69,22 +70,6 @@ class RequestModelBeautifier: NSObject {
         txt.append("------------------------------------------------------------------------\n")
         txt.append("------------------------------------------------------------------------\n\n\n\n")
         return txt
-    }
-
-    static func curlExport(request: RequestModel) -> String {
-        func serialize(dictionary: [String: String]) -> String {
-            let serialized = dictionary.reduce("") { (result, next) in
-                return result + "-H '\(next.key): \(next.value)' "
-            }
-
-            return serialized
-        }
-
-        let commandName = "cURL"
-        let method = "-X\(request.method)"
-        let headers = request.headers.map(serialize) ?? ""
-
-        return "\(commandName) \(method) \(headers) --compressed '\(request.url)'"
     }
 }
 
