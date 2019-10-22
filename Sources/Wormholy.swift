@@ -11,18 +11,32 @@ import UIKit
 
 public class Wormholy: NSObject {
     private static var _rewriteRules: [RewriteRule] = []
-    private static var _rewriteRulesLock = NSLock()
+    private static var _blacklist: [Filter] = []
+    private static var _configLock = NSLock()
 
     public static var rewriteRules: [RewriteRule] {
         get {
-            _rewriteRulesLock.lock()
-            defer { _rewriteRulesLock.unlock() }
+            _configLock.lock()
+            defer { _configLock.unlock() }
             return _rewriteRules
         }
         set {
-            _rewriteRulesLock.lock()
-            defer { _rewriteRulesLock.unlock() }
+            _configLock.lock()
+            defer { _configLock.unlock() }
             _rewriteRules = newValue
+        }
+    }
+
+    public static var blacklist: [Filter] {
+        get {
+            _configLock.lock()
+            defer { _configLock.unlock() }
+            return _blacklist
+        }
+        set {
+            _configLock.lock()
+            defer { _configLock.unlock() }
+            _blacklist = newValue
         }
     }
 
