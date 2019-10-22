@@ -17,6 +17,7 @@ public class CustomHTTPProtocol: URLProtocol {
     var session: URLSession?
     var sessionTask: URLSessionDataTask?
     var currentRequest: RequestModel?
+    var isBlacklistedForStorage = false
     
     override init(request: URLRequest, cachedResponse: CachedURLResponse?, client: URLProtocolClient?) {
         super.init(request: request, cachedResponse: cachedResponse, client: client)
@@ -49,8 +50,9 @@ public class CustomHTTPProtocol: URLProtocol {
         sessionTask?.resume()
         
         currentRequest = RequestModel(request: requestObject)
+        isBlacklistedForStorage = Wormholy.blacklist.contains { $0.urlPredicate.evaluate(with: modifiedRequest.url) }
 
-        if let request = currentRequest {
+        if !isBlacklistedForStorage, let request = currentRequest {
             Storage.shared.saveRequest(request: request)
         }
     }
@@ -62,7 +64,7 @@ public class CustomHTTPProtocol: URLProtocol {
             currentRequest?.duration = fabs(startDate.timeIntervalSinceNow) * 1000 //Find elapsed time and convert to milliseconds
         }
 
-        if let request = currentRequest {
+        if !isBlacklistedForStorage, let request = currentRequest {
             Storage.shared.saveRequest(request: request)
         }
 
