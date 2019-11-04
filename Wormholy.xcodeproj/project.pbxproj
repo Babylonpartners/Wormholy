@@ -462,7 +462,6 @@
 					E81B8F4D2338DA8D005E381F = {
 						CreatedOnToolsVersion = 10.3;
 						ProvisioningStyle = Automatic;
-						TestTargetID = 45087188207E59FE00EE2D31;
 					};
 				};
 			};
@@ -881,7 +880,6 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WormholyDemo.app/WormholyDemo";
 			};
 			name = Debug;
 		};
@@ -906,7 +904,6 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WormholyDemo.app/WormholyDemo";
 			};
 			name = Release;
 		};
