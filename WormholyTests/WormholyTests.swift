@@ -38,7 +38,7 @@ class WormholyTests: XCTestCase {
             )
         )
 
-        let expected = "curl -H 'accept: application/json' -H 'accept-language: en-US' -H 'content-type: application/json' -H 'host: dev.somecompany.com' -H 'x-app-name: somecompany' -H 'x-app-version: 4.7.0' -H 'x-platform: ios' -H 'x-platform-version: 12.4' --data-binary '{\"name\":\"Erich Zann\"}' --compressed 'https://dev.somecompany.com/api/v2/patients'"
+        let expected = "curl -H 'accept: application/json' -H 'accept-language: en-US' -H 'content-type: application/json' -H 'host: dev.somecompany.com' -H 'x-app-name: somecompany' -H 'x-app-version: 4.7.0' -H 'x-platform: ios' -H 'x-platform-version: 12.4' --data-binary '{\"name\":\"Erich Zann\"}' -X POST --compressed 'https://dev.somecompany.com/api/v2/patients'"
 
         XCTAssertTrue(generated == expected)
     }

@@ -83,19 +83,15 @@ class RequestModelBeautifier: NSObject {
             return result
         }
 
-        let curl = "curl"
         let headers = request.headers.map(serializeHeader) ?? ""
 
         let serializedBody = request.httpBody.map { body -> String in
             return " --data-binary '\(String(decoding: body, as: UTF8.self))'"
         }
 
-        var body = "\(serializedBody ?? "")"
-        if request.method.lowercased() != "post" {
-            body +=  " -X \(request.method.uppercased())"
-        }
+        let body = "\(serializedBody ?? "") -X \(request.method.uppercased())"
         
-        return "\(curl)\(headers)\(body) --compressed '\(request.url)'"
+        return "curl\(headers)\(body) --compressed '\(request.url)'"
     }
 }
 
