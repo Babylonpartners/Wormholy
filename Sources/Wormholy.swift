@@ -129,7 +129,7 @@ public class Wormholy: NSObject {
     }()
 }
 
-extension Wormholy: SelfAware {
+extension Wormholy {
     
     static func awake() {
         initializeAction
